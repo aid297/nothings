@@ -1,6 +1,6 @@
 [package]
 name = "nothings"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2024"
 description = "一个实用的工具库"
 license = "MIT"

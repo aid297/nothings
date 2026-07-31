@@ -19,7 +19,7 @@
 ### 快速开始
 
 ```rust
-use aid::digests::bcrypt::Bcrypt;
+use nothings::digests::bcrypt::Bcrypt;
 
 let plaintext = "my_password";
 
@@ -62,7 +62,7 @@ let hashed = bcrypt.hash().unwrap();
 ### 快速开始
 
 ```rust
-use aid::digests::md5::Md5Hash;
+use nothings::digests::md5::Md5Hash;
 
 let data = "hello world";
 let hashed = Md5Hash::new(data).hash();
@@ -91,7 +91,7 @@ println!("{}", hashed); // 5eb63bbbe01eeed093cb22bb8f5acdc3
 ### 快速开始
 
 ```rust
-use aid::digests::sha::Sha256Hash;
+use nothings::digests::sha::Sha256Hash;
 
 let data = "hello world";
 let hashed = Sha256Hash::new(data).hash();

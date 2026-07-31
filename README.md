@@ -1,4 +1,4 @@
-# aid
+# nothings
 
 一个通用的 Rust 增强工具库，提供 `AnySlice<T>`（增强版 `Vec<T>`）、`AnyMap<K, V>`（有序键值对映射）、`Lz4`（LZ4 压缩/解压）、`Lzo`（LZO 压缩/解压）、`Zlib`（zlib 压缩/解压）、`Zstd`（Zstandard 压缩/解压）、`Bcrypt`（密码哈希与验证）、`Md5`（MD5 哈希）以及 `Sha256`（SHA256 哈希）等模块，支持丰富的链式操作方法，让数据处理更加简洁高效。
 
@@ -6,15 +6,15 @@
 
 ```toml
 [dependencies]
-aid = "0.1.0"
+nothings = "0.0.1"
 ```
 
 ## 模块目录
 
 | 模块 | 说明 | 文档 |
 |------|------|------|
-| **AnySlice** | 增强版 `Vec<T>`，提供 43 个方法，支持链式调用、集合运算、pluck 等 | [查看文档](src/anySlices/README.md) |
-| **AnyMap** | 有序键值对映射，基于平行 AnySlice 实现，保留插入顺序 | [查看文档](src/anyMaps/README.md) |
+| **AnySlice** | 增强版 `Vec<T>`，提供 43 个方法，支持链式调用、集合运算、pluck 等 | [查看文档](src/any_slices/README.md) |
+| **AnyMap** | 有序键值对映射，基于平行 AnySlice 实现，保留插入顺序 | [查看文档](src/any_maps/README.md) |
 | **Lz4** | LZ4 压缩/解压，支持 1-16 级压缩级别，支持内存数据和文件 | [查看文档](src/compressions/lz4/README.md) |
 | **Lzo** | LZO 压缩/解压，注重解压速度，标准 LZO1X 格式，支持内存数据和文件 | [查看文档](src/compressions/lzo/README.md) |
 | **Zlib** | zlib 压缩/解压，支持 0-9 级压缩级别，通用格式广泛兼容 | [查看文档](src/compressions/zlib/README.md) |
@@ -28,7 +28,7 @@ aid = "0.1.0"
 ### AnySlice — 增强版 Vec
 
 ```rust
-use aid::anySlices::app::AnySlice;
+use nothings::any_slices::app::AnySlice;
 
 let mut slice = AnySlice::new(vec![1, 2, 3, 4, 5]);
 
@@ -51,7 +51,7 @@ let difference = a.difference(&b);     // [1]
 ### AnyMap — 有序键值对映射
 
 ```rust
-use aid::anyMaps::app::AnyMap;
+use nothings::any_maps::app::AnyMap;
 
 // 从迭代器创建
 let mut map = AnyMap::from_iter(vec![("alice", 90), ("bob", 85), ("charlie", 92)]);
@@ -75,7 +75,7 @@ println!("{}", map.to_string(Some(", ")));
 ### Lz4 — LZ4 压缩/解压
 
 ```rust
-use aid::compressions::lz4::app::Lz4;
+use nothings::compressions::lz4::app::Lz4;
 
 let data = b"hello world, this is some test data";
 
@@ -95,7 +95,7 @@ Lz4::decompress_file("output.lz4", "output.txt").unwrap();
 ### Lzo — LZO 压缩/解压
 
 ```rust
-use aid::compressions::lzo::app::Lzo;
+use nothings::compressions::lzo::app::Lzo;
 
 let data = b"hello world, this is some test data";
 
@@ -113,7 +113,7 @@ Lzo::decompress_file("output.lzo", "output.txt").unwrap();
 ### Zlib — zlib 压缩/解压
 
 ```rust
-use aid::compressions::zlib::app::Zlib;
+use nothings::compressions::zlib::app::Zlib;
 
 let data = b"hello world, this is some test data";
 
@@ -133,7 +133,7 @@ Zlib::decompress_file("output.zlib", "output.txt").unwrap();
 ### Zstd — Zstandard 压缩/解压
 
 ```rust
-use aid::compressions::zstd4::app::Zstd;
+use nothings::compressions::zstd4::app::Zstd;
 
 let data = b"hello world, this is some test data";
 
@@ -153,7 +153,7 @@ Zstd::decompress_file("output.zst", "output.txt").unwrap();
 ### Bcrypt — 密码哈希与验证
 
 ```rust
-use aid::digests::bcrypt::Bcrypt;
+use nothings::digests::bcrypt::Bcrypt;
 
 let plaintext = "my_password";
 
@@ -173,7 +173,7 @@ let hashed = bcrypt.hash().unwrap();
 ### Md5 — MD5 哈希
 
 ```rust
-use aid::digests::md5::Md5Hash;
+use nothings::digests::md5::Md5Hash;
 
 let data = "hello world";
 let hashed = Md5Hash::new(data).hash();
@@ -183,7 +183,7 @@ println!("{}", hashed); // 5eb63bbbe01eeed093cb22bb8f5acdc3
 ### Sha256 — SHA256 哈希
 
 ```rust
-use aid::digests::sha::Sha256Hash;
+use nothings::digests::sha::Sha256Hash;
 
 let data = "hello world";
 let hashed = Sha256Hash::new(data).hash();

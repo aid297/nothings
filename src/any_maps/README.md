@@ -5,7 +5,7 @@
 ## 快速开始
 
 ```rust
-use aid::anyMaps::app::AnyMap;
+use nothings::any_maps::app::AnyMap;
 
 // 从迭代器创建
 let mut map = AnyMap::from_iter(vec![("alice", 90), ("bob", 85), ("charlie", 92)]);
@@ -90,7 +90,7 @@ println!("{}", map.to_string(Some(", ")));
 ### 从 HashMap 创建并操作
 
 ```rust
-use aid::anyMaps::app::AnyMap;
+use nothings::any_maps::app::AnyMap;
 use std::collections::HashMap;
 
 let mut hm = HashMap::new();

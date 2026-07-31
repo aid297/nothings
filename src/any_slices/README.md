@@ -5,7 +5,7 @@
 ## 快速开始
 
 ```rust
-use aid::anySlices::app::AnySlice;
+use nothings::any_slices::app::AnySlice;
 
 let mut slice = AnySlice::new(vec![1, 2, 3, 4, 5]);
 

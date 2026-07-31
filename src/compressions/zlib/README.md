@@ -5,7 +5,7 @@
 ## 快速开始
 
 ```rust
-use aid::compressions::zlib::app::Zlib;
+use nothings::compressions::zlib::app::Zlib;
 
 let data = b"hello world, this is some test data";
 
