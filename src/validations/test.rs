@@ -1,4 +1,4 @@
-use aid_macros::Nothings;
+use nothings_macros::Nothings;
 use crate::validations::error::ValidationError;
 use crate::validations::validation::Validation;
 use crate::validations::check::Check;

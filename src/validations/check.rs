@@ -1,6 +1,6 @@
 use crate::validations::{*};
 use crate::validations::checker::Checker;
-use crate::validations::aid_rs_validator_struct_parser::NothingsValidatorStructParser;
+use crate::validations::validator_struct_parser::NothingsValidatorStructParser;
 
 pub struct Check<T> {
     data: T,

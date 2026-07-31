@@ -1,6 +1,6 @@
 use crate::validations::error::ValidationError;
 use crate::validations::field::Field;
-use crate::validations::aid_rs_validator_struct_parser::NothingsValidatorStructParser;
+use crate::validations::validator_struct_parser::NothingsValidatorStructParser;
 use std::collections::HashMap;
 use std::sync::{Mutex, OnceLock};
 
