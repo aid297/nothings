@@ -273,7 +273,7 @@ dependencies = [
 
 [[package]]
 name = "nothings"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "bcrypt",
  "flate2",
@@ -289,7 +289,7 @@ dependencies = [
 
 [[package]]
 name = "nothings-macros"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "proc-macro2",
  "quote",
