@@ -1,0 +1,23 @@
+[package]
+name = "nothings"
+version = "0.0.1"
+edition = "2024"
+description = "一个实用的工具库"
+license = "MIT"
+repository = "https://github.com/aid297/aid-rs.git"
+homepage = "https://github.com/aid297/aid"
+keywords = ["slice", "collection", "utility"]   # 可选，最多5个，方便搜索
+categories = ["data-structures"]
+readme = "README.md"
+
+[dependencies]
+rand = "0.10.2"
+lz4 = "1.28"
+minilzo = "0.2"
+flate2 = "1"
+zstd = "0.13"
+tokio = { version = "1", features = ["rt-multi-thread", "time", "sync", "macros"] }
+bcrypt = "0.17"
+md-5 = "0.10"
+sha2 = "0.10"
+aid-macros = { version = "0.1.0", path = "nothings-macros" }

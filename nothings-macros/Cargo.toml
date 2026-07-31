@@ -1,0 +1,15 @@
+[package]
+name = "nothings-macros"
+version = "0.0.1"
+edition = "2024"
+description = "nothings 的派生宏支持"
+license = "MIT"
+repository = "https://github.com/aid297/aid-rs.git"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1"
+syn = { version = "2", features = ["full", "parsing"] }
+proc-macro2 = "1"
