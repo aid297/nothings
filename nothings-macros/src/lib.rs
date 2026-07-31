@@ -155,7 +155,7 @@ pub fn derive_nothings(input: TokenStream) -> TokenStream {
                     if is_nested {
                         return quote! {
                             {
-                                let nested_fields = ::nothings::validations::aid_rs_validator_struct_parser::NothingsValidatorStructParser::parse_fields(&self.#field_name);
+                                let nested_fields = ::nothings::validations::validator_struct_parser::NothingsValidatorStructParser::parse_fields(&self.#field_name);
                                 for mut f in nested_fields {
                                     f.name = format!("{}.{}", #field_name_str, f.name);
                                     fields.push(f);
@@ -248,7 +248,7 @@ pub fn derive_nothings(input: TokenStream) -> TokenStream {
     };
 
     let expanded = quote! {
-        impl #impl_generics ::nothings::validations::aid_rs_validator_struct_parser::NothingsValidatorStructParser for #name #ty_generics #where_clause {
+        impl #impl_generics ::nothings::validations::validator_struct_parser::NothingsValidatorStructParser for #name #ty_generics #where_clause {
             fn parse_fields(&self) -> Vec<::nothings::validations::field::Field> {
                 #fields_extraction
             }
