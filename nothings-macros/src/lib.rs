@@ -69,27 +69,65 @@ fn parse_validator_attrs(tokens: &proc_macro2::TokenStream) -> Vec<(String, Stri
     result
 }
 
-/// 派生宏：解析结构体字段上的 #[validator(...)] 属性
+/// 解析新格式的规则字符串：`(rule1)(rule2)(rule3)`
+/// 每条规则包裹在 `(...)` 中，操作符直接跟在规则名后
+/// 例如：`(required)(min>10)(max<=100)(size==200)(size!=400)(in==a,b,c)(in!=e,c,d)`
+fn parse_paren_rules(input: &str) -> Vec<String> {
+    let mut rules = Vec::new();
+    let chars: Vec<char> = input.chars().collect();
+    let len = chars.len();
+    let mut i = 0;
+
+    while i < len {
+        // 找到下一个 '('
+        while i < len && chars[i] != '(' {
+            i += 1;
+        }
+        if i >= len {
+            break;
+        }
+        i += 1; // 跳过 '('
+
+        let start = i;
+        // 找到匹配的 ')'
+        while i < len && chars[i] != ')' {
+            i += 1;
+        }
+        let rule: String = chars[start..i].iter().collect();
+        let rule = rule.trim().to_string();
+        if !rule.is_empty() {
+            rules.push(rule);
+        }
+        if i < len {
+            i += 1; // 跳过 ')'
+        }
+    }
+
+    rules
+}
+
+/// 派生宏：解析结构体字段上的 #[validator[...]] 属性
 /// 
 /// 使用示例：
 /// ```ignore
 /// #[derive(Nothings)]
 /// struct MyStruct {
-///     #[validator(rule = "min:`>10`;max:`<=100`;size:`=20`" name = "年龄" kind = "usize")]
+///     #[validator[rule="(required)(min>10)(max<=100)(size==200)(in==a,b,c)" name="年龄" kind="usize"]]
 ///     age: usize,
 ///     
 ///     // 嵌套结构体，递归解析
-///     #[validator(nested)]
+///     #[validator[nested]]
 ///     address: Address,
 /// }
 /// ```
 /// 
 /// 规则语法：
-/// - 规则之间用 `;` 分隔
-/// - 格式：`key:`操作符+值``  如 `min:`>10``、`size:`=20``
-/// - 支持的操作符：`>`, `<`, `>=`, `<=`, `=`, `!=`
-/// - `ex` 规则使用 `:` 后跟函数列表：`ex:`fn1,fn2``
-/// - `in` 规则支持 `=` (在列表中) 和 `!=` (不在列表中)：`in:`=a,b,c``、`in:`!=x,y,z``
+/// - 每条规则用 `(...)` 包裹，操作符直接跟在规则名后
+/// - 格式：`(key op value)` 如 `(min>10)`、`(size==20)`、`(in==a,b,c)`
+/// - 支持的操作符：`>`, `<`, `>=`, `<=`, `==`, `!=`
+/// - `required` 为无参数的独立规则
+/// - `ex` 规则使用冒号后跟函数列表：`(ex:fn1,fn2)`
+/// - `in` 规则支持 `==` (在列表中) 和 `!=` (不在列表中)：`(in==a,b,c)`、`(in!=x,y,z)`
 /// 
 /// 嵌套语法：
 /// - 使用 `nested` 标记嵌套结构体字段
@@ -175,13 +213,11 @@ pub fn derive_nothings(input: TokenStream) -> TokenStream {
                     }
                     
                     // 解析 rule 字符串，将每条规则转换为 Vec 元素
+                    // 新格式：(required)(min>10)(max<=100)
                     let rules: Vec<String> = if rules_str.is_empty() {
                         vec![]
                     } else {
-                        rules_str.split(';')
-                            .map(|s| s.trim().to_string())
-                            .filter(|s| !s.is_empty())
-                            .collect()
+                        parse_paren_rules(&rules_str)
                     };
 
                     if is_option {

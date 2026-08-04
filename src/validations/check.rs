@@ -6,25 +6,40 @@ pub struct Check<T> {
     data: T,
 }
 
-/// 从规则字符串中提取操作符和值
-/// 输入格式：`operator+value`（如 `>10`、`<=100`、`=20`、`!=a,b,c`）
-/// 返回：(操作符, 值) 如 (`>`, `10`)
-fn parse_op_value(s: &str) -> Option<(&str, &str)> {
-    if let Some(v) = s.strip_prefix(">=") {
-        Some((">=", v))
-    } else if let Some(v) = s.strip_prefix("<=") {
-        Some(("<=", v))
-    } else if let Some(v) = s.strip_prefix("!=") {
-        Some(("!=", v))
-    } else if let Some(v) = s.strip_prefix(">") {
-        Some((">", v))
-    } else if let Some(v) = s.strip_prefix("<") {
-        Some(("<", v))
-    } else if let Some(v) = s.strip_prefix("=") {
-        Some(("=", v))
-    } else {
-        None
+/// 从规则字符串中提取规则名、操作符和值
+/// 新格式：`min>10`、`max<=100`、`size==200`、`in!=a,b,c`
+/// 返回：(规则名, 操作符, 值) 如 (`min`, `>`, `10`)
+fn parse_rule_parts(rule: &str) -> Option<(&str, &str, &str)> {
+    let bytes = rule.as_bytes();
+    let len = bytes.len();
+
+    for i in 0..len {
+        let b = bytes[i];
+        // 找到第一个操作符字符
+        if b == b'>' || b == b'<' || b == b'=' || b == b'!' {
+            let key = &rule[..i];
+            if key.is_empty() {
+                return None;
+            }
+            // 检查是否为双字符操作符
+            if i + 1 < len {
+                let next = bytes[i + 1];
+                match (b, next) {
+                    (b'>', b'=') => return Some((key, ">=", &rule[i + 2..])),
+                    (b'<', b'=') => return Some((key, "<=", &rule[i + 2..])),
+                    (b'!', b'=') => return Some((key, "!=", &rule[i + 2..])),
+                    (b'=', b'=') => return Some((key, "==", &rule[i + 2..])),
+                    _ => {}
+                }
+            }
+            // 单字符操作符（`!` 单独出现无效）
+            if b == b'!' {
+                return None;
+            }
+            return Some((key, &rule[i..i + 1], &rule[i + 1..]));
+        }
     }
+    None
 }
 
 /// 数值比较：将 origin 和 target 都解析为 f64 进行比较
@@ -55,7 +70,7 @@ fn check_by_op(origin: &f64, target: &f64, op:&str, field_name: &str) -> Option<
         "<" => origin < target,
         ">=" => origin >= target,
         "<=" => origin <= target,
-        "=" => (origin - target).abs() < f64::EPSILON,
+        "==" => (origin - target).abs() < f64::EPSILON,
         "!=" => (origin - target).abs() >= f64::EPSILON,
         _ => true,
     };
@@ -83,8 +98,6 @@ fn check_size(origin: &str, op: &str, target: &str, field_name: &str) -> Option<
     };
     
     check_by_op(&size, &target_val, op, field_name)
-    
-    
 }
 
 /// 列表检查：判断 origin 是否在逗号分隔的列表中
@@ -93,13 +106,13 @@ fn check_in_list(origin: &str, op: &str, list_str: &str, field_name: &str) -> Op
     let in_list = list.contains(&origin);
     
     let passed = match op {
-        "=" => in_list,
+        "==" => in_list,
         "!=" => !in_list,
         _ => true,
     };
     
     if !passed {
-        let msg = if op == "=" {
+        let msg = if op == "==" {
             format!("字段 '{}' 的值 '{}' 不在允许列表 [{}] 中", field_name, origin, list_str)
         } else {
             format!("字段 '{}' 的值 '{}' 在不允许的列表 [{}] 中", field_name, origin, list_str)
@@ -134,51 +147,46 @@ where
                     });
                 }
                 
-                // ex 规则格式：`ex:`fn1,fn2,fn3``
-                if let Some(fn_names) = rule.strip_prefix("ex:`") {
-                    if let Some(fn_names) = fn_names.strip_suffix('`') {
-                        for fn_name in fn_names.split(',') {
-                            let fn_name = fn_name.trim();
-                            if let Some(err) = validation::Validation::call_ex_check_fn(
-                                &field.name,
-                                &field.origin,
-                                &field.kind,
-                                fn_name,
-                            ) {
+                // ex 规则格式：`ex:fn1,fn2,fn3`
+                if let Some(fn_names) = rule.strip_prefix("ex:") {
+                    for fn_name in fn_names.split(',') {
+                        let fn_name = fn_name.trim();
+                        if let Some(err) = validation::Validation::call_ex_check_fn(
+                            &field.name,
+                            &field.origin,
+                            &field.kind,
+                            fn_name,
+                        ) {
+                            return Some(err);
+                        }
+                    }
+                    continue;
+                }
+                
+                // 通用规则新格式：`key op value`（如 `min>10`、`size==200`、`in==a,b,c`）
+                if let Some((key, op, value)) = parse_rule_parts(rule) {
+                    match key {
+                        "min" | "max" => {
+                            // 字符串类型用长度比较，其他类型用数值比较
+                            if field.kind == "string" || field.kind == "& str" || field.kind == "String" {
+                                if let Some(err) = check_size(&field.origin, op, value, &field.name) {
+                                    return Some(err);
+                                }
+                            } else if let Some(err) = check_numeric(&field.origin, op, value, &field.name) {
                                 return Some(err);
                             }
                         }
-                    }
-                }
-                
-                // 通用规则格式：`key:`operator+value``
-                // 解析 key 和 backtick 包裹的内容
-                if let Some(colon_pos) = rule.find(':') {
-                    let key = &rule[..colon_pos];
-                    let rest = &rule[colon_pos + 1..];
-                    
-                    // 去除 backtick 包裹
-                    if let Some(inner) = rest.strip_prefix('`').and_then(|s| s.strip_suffix('`')) {
-                        if let Some((op, value)) = parse_op_value(inner) {
-                            match key {
-                                "min" | "max" => {
-                                    if let Some(err) = check_numeric(&field.origin, op, value, &field.name) {
-                                        return Some(err);
-                                    }
-                                }
-                                "size" => {
-                                    if let Some(err) = check_size(&field.origin, op, value, &field.name) {
-                                        return Some(err);
-                                    }
-                                }
-                                "in" => {
-                                    if let Some(err) = check_in_list(&field.origin, op, value, &field.name) {
-                                        return Some(err);
-                                    }
-                                }
-                                _ => {}
+                        "size" => {
+                            if let Some(err) = check_size(&field.origin, op, value, &field.name) {
+                                return Some(err);
                             }
                         }
+                        "in" => {
+                            if let Some(err) = check_in_list(&field.origin, op, value, &field.name) {
+                                return Some(err);
+                            }
+                        }
+                        _ => {}
                     }
                 }
             }

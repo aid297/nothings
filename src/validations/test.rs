@@ -114,13 +114,13 @@ fn test_ex_fn_with_kind() {
 
 #[derive(Nothings)]
 struct A<'a >{
-    #[validator(rule = "min:`>3`;max:`<=4`", name = "姓名", kind = "string")]
+    #[validator[rule="(min>3)(max<=4)" name="姓名" kind="string"]]
     name: String,
-    #[validator(rule = "min:`>20`;max:`<=100`", name = "年龄", kind = "usize")]
+    #[validator[rule="(min>20)(max<=100)" name="年龄" kind="usize"]]
     age: usize,
-    #[validator(rule = "min:`>1`", name = "性别")]
+    #[validator[rule="(min>1)" name="性别"]]
     sex: &'a str,
-    #[validator(rule = "max:`<999`", name = "身高")]
+    #[validator[rule="(max<999)" name="身高"]]
     height: f64,
 }
 
@@ -141,28 +141,28 @@ fn test_struct_parser(){
     assert_eq!(fields[0].name, "姓名");
     assert_eq!(fields[0].kind, "string");
     assert_eq!(fields[0].origin, "alice");
-    assert_eq!(fields[0].rules, vec!["min:`>3`", "max:`<=4`"]);
+    assert_eq!(fields[0].rules, vec!["min>3", "max<=4"]);
     
     assert_eq!(fields[1].name, "年龄");
     assert_eq!(fields[1].kind, "usize");
     assert_eq!(fields[1].origin, "18");
-    assert_eq!(fields[1].rules, vec!["min:`>20`", "max:`<=100`"]);
+    assert_eq!(fields[1].rules, vec!["min>20", "max<=100"]);
     
     assert_eq!(fields[2].name, "性别");
     assert_eq!(fields[2].origin, "female");
-    assert_eq!(fields[2].rules, vec!["min:`>1`"]);
+    assert_eq!(fields[2].rules, vec!["min>1"]);
     
     assert_eq!(fields[3].name, "身高");
     assert_eq!(fields[3].origin, "170.5");
-    assert_eq!(fields[3].rules, vec!["max:`<999`"]);
+    assert_eq!(fields[3].rules, vec!["max<999"]);
 }
 
 // 测试 Option 字段的 required 规则
 #[derive(Nothings)]
 struct FormWithOption {
-    #[validator(rule = "required", name = "邮箱", kind = "string")]
+    #[validator[rule="(required)" name="邮箱" kind="string"]]
     email: Option<String>,
-    #[validator(rule = "min:`>3`", name = "昵称", kind = "string")]
+    #[validator[rule="(min>3)" name="昵称" kind="string"]]
     nickname: Option<String>,
 }
 
@@ -235,15 +235,15 @@ fn test_option_some_check_pass() {
 
 #[derive(Nothings)]
 struct RuleTestForm {
-    #[validator(rule = "min:`>18`", name = "年龄", kind = "usize")]
+    #[validator[rule="(min>18)" name="年龄" kind="usize"]]
     age: usize,
-    #[validator(rule = "max:`<=100`", name = "分数", kind = "usize")]
+    #[validator[rule="(max<=100)" name="分数" kind="usize"]]
     score: usize,
-    #[validator(rule = "size:`=5`", name = "编码", kind = "string")]
+    #[validator[rule="(size==5)" name="编码" kind="string"]]
     code: String,
-    #[validator(rule = "in:`=admin,user,guest`", name = "角色", kind = "string")]
+    #[validator[rule="(in==admin,user,guest)" name="角色" kind="string"]]
     role: String,
-    #[validator(rule = "in:`!=banned,blocked`", name = "状态", kind = "string")]
+    #[validator[rule="(in!=banned,blocked)" name="状态" kind="string"]]
     status: String,
 }
 
@@ -263,7 +263,7 @@ fn test_min_rule_pass() {
 #[test]
 fn test_min_rule_fail() {
     let form = RuleTestForm {
-        age: 10, // min:`>18` 应失败
+        age: 10, // min>18 应失败
         score: 80,
         code: "ABCDE".into(),
         role: "admin".into(),
@@ -278,7 +278,7 @@ fn test_min_rule_fail() {
 fn test_max_rule_fail() {
     let form = RuleTestForm {
         age: 25,
-        score: 150, // max:`<=100` 应失败
+        score: 150, // max<=100 应失败
         code: "ABCDE".into(),
         role: "admin".into(),
         status: "active".into(),
@@ -293,7 +293,7 @@ fn test_size_rule_pass() {
     let form = RuleTestForm {
         age: 25,
         score: 80,
-        code: "ABCDE".into(), // 长度=5，size:`=5` 应通过
+        code: "ABCDE".into(), // 长度=5，size==5 应通过
         role: "admin".into(),
         status: "active".into(),
     };
@@ -306,7 +306,7 @@ fn test_size_rule_fail() {
     let form = RuleTestForm {
         age: 25,
         score: 80,
-        code: "ABC".into(), // 长度=3，size:`=5` 应失败
+        code: "ABC".into(), // 长度=3，size==5 应失败
         role: "admin".into(),
         status: "active".into(),
     };
@@ -372,7 +372,7 @@ fn test_not_in_rule_fail() {
 // 多规则组合测试
 #[derive(Nothings)]
 struct MultiRuleForm {
-    #[validator(rule = "min:`>0`;max:`<=150`", name = "年龄", kind = "usize")]
+    #[validator[rule="(min>0)(max<=150)" name="年龄" kind="usize"]]
     age: usize,
 }
 
@@ -385,14 +385,14 @@ fn test_multi_rules_all_pass() {
 
 #[test]
 fn test_multi_rules_first_fail() {
-    let form = MultiRuleForm { age: 0 }; // min:`>0` 失败
+    let form = MultiRuleForm { age: 0 }; // min>0 失败
     let checker = Check::new(form);
     assert!(checker.check().is_some());
 }
 
 #[test]
 fn test_multi_rules_second_fail() {
-    let form = MultiRuleForm { age: 200 }; // max:`<=150` 失败
+    let form = MultiRuleForm { age: 200 }; // max<=150 失败
     let checker = Check::new(form);
     assert!(checker.check().is_some());
 }
