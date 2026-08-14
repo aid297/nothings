@@ -22,18 +22,18 @@ impl<T> HttpResponse<T> {
         }
     }
     
-    pub fn ok(msg: Option<String>) -> HttpResponse<T> {
+    pub fn ok(msg: Option<&str>) -> HttpResponse<T> {
         HttpResponse {
             code: 200,
-            msg: msg.unwrap_or_else(|| "OK".to_string()),
+            msg: msg.unwrap_or_else(|| "OK").to_string(),
             ..HttpResponse::empty()
         }
     }
     
-    pub fn created(msg: Option<String>) -> HttpResponse<T> {
+    pub fn created(msg: Option<&str>) -> HttpResponse<T> {
         HttpResponse {
             code: 201,
-            msg: msg.unwrap_or_else(|| "创建成功".to_string()),
+            msg: msg.unwrap_or_else(|| "创建成功").to_string(),
             ..HttpResponse::empty()
         }
     }
@@ -46,34 +46,34 @@ impl<T> HttpResponse<T> {
         }
     }
     
-    pub fn deleted(msg: Option<String>) -> HttpResponse<T> {
+    pub fn deleted(msg: Option<&str>) -> HttpResponse<T> {
         HttpResponse {
             code: 204,
-            msg: msg.unwrap_or_else(|| "删除成功".to_string()),
+            msg: msg.unwrap_or_else(|| "删除成功").to_string(),
             ..HttpResponse::empty()
         }
     }
     
-    pub fn bad_request(msg: String) -> HttpResponse<T> {
+    pub fn bad_request(msg: &str) -> HttpResponse<T> {
         HttpResponse {
             code: 400,
-            msg,
+            msg:msg.to_string(),
             ..HttpResponse::empty()
         }
     }
     
-    pub fn un_authorization(msg: Option<String>) -> HttpResponse<T> {
+    pub fn un_authorization(msg: Option<&str>) -> HttpResponse<T> {
         HttpResponse {
             code: 401,
-            msg: msg.unwrap_or_else(|| "未授权".to_string()),
+            msg: msg.unwrap_or_else(|| "未授权").to_string(),
             ..HttpResponse::empty()
         }
     }
     
-    pub fn internal_server_error(msg: String) -> HttpResponse<T> {
+    pub fn internal_server_error(msg: &str) -> HttpResponse<T> {
         HttpResponse {
             code: 500,
-            msg,
+            msg:msg.to_string(),
             ..HttpResponse::empty()
         }
     }
