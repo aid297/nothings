@@ -8,3 +8,4 @@ pub mod digests;
 pub mod filesystem;
 pub mod singletons;
 pub mod validations;
+pub mod http_response;

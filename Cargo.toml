@@ -21,3 +21,4 @@ bcrypt = "0.17"
 md-5 = "0.10"
 sha2 = "0.10"
 nothings-macros = { version = "0.0.2", path = "nothings-macros" }
+serde = { version = "1.0.229", features = ["derive"] }
