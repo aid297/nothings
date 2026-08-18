@@ -20,7 +20,7 @@ let d = Duration::from_secs(3600);
 assert_eq!(d, HOUR);
 ```
 
-## `parse_duration`
+## `with_text`
 
 解析时间字符串，返回 `Result<Duration, String>`。
 
@@ -96,7 +96,7 @@ assert!(parse_duration("10x").is_err());
 assert!(parse_duration("s10").is_err());
 ```
 
-## `describe_duration`
+## `to_chinese`
 
 解析时间字符串，返回中文可读描述：
 
@@ -116,7 +116,7 @@ assert_eq!(describe_duration("1d12"), Ok("1天12小时".to_string()));
 
 ## 与 `std::time::Duration` 互操作
 
-`parse_duration` 返回标准库 `Duration`，可直接使用其所有方法：
+`with_text` 返回标准库 `Duration`，可直接使用其所有方法：
 
 ```rust
 let d = parse_duration("1h30m").unwrap();
