@@ -191,11 +191,13 @@ pub fn derive_nothings(input: TokenStream) -> TokenStream {
                     
                     // 处理嵌套结构体
                     if is_nested {
+                        // 如果指定了 name，用 name 作为前缀；否则用 Rust 字段名
+                        let prefix = if has_name { name_value } else { field_name_str };
                         return quote! {
                             {
                                 let nested_fields = ::nothings::validations::validator_struct_parser::NothingsValidatorStructParser::parse_fields(&self.#field_name);
                                 for mut f in nested_fields {
-                                    f.name = format!("{}.{}", #field_name_str, f.name);
+                                    f.name = format!("{}.{}", #prefix, f.name);
                                     fields.push(f);
                                 }
                             }
