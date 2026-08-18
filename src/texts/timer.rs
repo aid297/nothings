@@ -38,7 +38,7 @@ fn next_smaller_unit(c: char) -> Option<Duration> {
 /// # Examples
 ///
 /// ```
-/// use nothings::consts::time_info::time_info::parse_duration;
+/// use nothings::texts::timer::parse_duration;
 /// use std::time::Duration;
 ///
 /// assert_eq!(parse_duration("10s"), Ok(Duration::from_secs(10)));
@@ -113,7 +113,7 @@ pub fn parse_duration(s: &str) -> Result<Duration, String> {
 /// # Examples
 ///
 /// ```
-/// use nothings::consts::time_info::time_info::describe_duration;
+/// use nothings::texts::timer::describe_duration;
 ///
 /// assert_eq!(describe_duration("1h30m"), Ok("1小时30分钟".to_string()));
 /// ```

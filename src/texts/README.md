@@ -13,7 +13,7 @@
 | `WEEK` | 604800 秒 |
 
 ```rust
-use nothings::consts::text_time::*;
+use nothings::texts::timer::*;
 use std::time::Duration;
 
 let d = Duration::from_secs(3600);
@@ -37,7 +37,7 @@ assert_eq!(d, HOUR);
 ### 基本用法
 
 ```rust
-use nothings::consts::text_time::parse_duration;
+use nothings::texts::timer::parse_duration;
 use std::time::Duration;
 
 assert_eq!(parse_duration("10s"), Ok(Duration::from_secs(10)));
@@ -101,7 +101,7 @@ assert!(parse_duration("s10").is_err());
 解析时间字符串，返回中文可读描述：
 
 ```rust
-use nothings::consts::text_time::describe_duration;
+use nothings::texts::timer::describe_duration;
 
 assert_eq!(describe_duration("1h30m"), Ok("1小时30分钟".to_string()));
 assert_eq!(describe_duration("2d"), Ok("2天".to_string()));
