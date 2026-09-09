@@ -48,7 +48,7 @@ fn test_ex_fn_global() {
     let result = Validation::call_ex_check_fn("test", "short", "string", "global-check");
     assert!(result.is_none());
     
-    let result = Validation::call_ex_check_fn("test", "this is a very long string", "string", "global-check");
+    let result = Validation::call_ex_check_fn("test", "this is attr very long string", "string", "global-check");
     assert!(result.is_some());
 }
 
@@ -105,7 +105,7 @@ fn test_ex_fn_with_kind() {
     assert!(result.is_none());
 
     // string 类型校验
-    let result = Validation::call_ex_check_fn("name", "a".repeat(60).as_str(), "string", "check-range");
+    let result = Validation::call_ex_check_fn("name", "attr".repeat(60).as_str(), "string", "check-range");
     assert!(result.is_some());
     
     let result = Validation::call_ex_check_fn("name", "short", "string", "check-range");

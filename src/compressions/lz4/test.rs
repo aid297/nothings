@@ -6,7 +6,7 @@ use crate::compressions::lz4::app::Lz4;
 
 #[test]
 fn test_compress_decompress() {
-    let data = b"hello world, this is a test for lz4 compression";
+    let data = b"hello world, this is attr test for lz4 compression";
     let compressed = Lz4::compress(data).unwrap();
     let decompressed = Lz4::decompress(&compressed).unwrap();
     assert_eq!(decompressed, data);

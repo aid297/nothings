@@ -47,7 +47,7 @@ fn test_set_value() {
 #[test]
 fn test_set_value_chain() {
     let mut slice = AnySlice::new(vec![0, 0, 0]);
-    slice.set_value(0, 1).set_value(2, 3);
+    slice.set_value(0, 1).set_value(2, 3).first();
     assert_eq!(slice.get_data(), vec![1, 0, 3]);
 }
 
@@ -114,7 +114,7 @@ fn test_not_has_false() {
 #[test]
 fn test_get_value_some() {
     let slice = AnySlice::new(vec![10, 20, 30]);
-    assert_eq!(slice.get_value_by_index(1), Some(&20));
+    assert_eq!(slice.get_value_by_index(1), Some(20));
 }
 
 #[test]
@@ -167,14 +167,14 @@ fn test_get_value_default_fallback() {
 fn test_get_values() {
     let slice = AnySlice::new(vec![10, 20, 30, 40]);
     let result = slice.get_values(&[0, 2, 3]);
-    assert_eq!(result, vec![&10, &30, &40]);
+    assert_eq!(result, vec![10, 30, 40]);
 }
 
 #[test]
 fn test_get_values_out_of_range_ignored() {
     let slice = AnySlice::new(vec![10, 20]);
     let result = slice.get_values(&[0, 5, 1]);
-    assert_eq!(result, vec![&10, &20]);
+    assert_eq!(result, vec![10, 20]);
 }
 
 // ─────────────────────────────────────────────
@@ -186,7 +186,7 @@ fn test_get_values_by_slicer() {
     let slice = AnySlice::new(vec![10, 20, 30, 40]);
     let slicer = AnySlice::new(vec![1, 3]);
     let result = slice.get_values_by_slicer(&slicer);
-    assert_eq!(result, vec![&20, &40]);
+    assert_eq!(result, vec![20, 40]);
 }
 
 // ─────────────────────────────────────────────
@@ -196,7 +196,7 @@ fn test_get_values_by_slicer() {
 #[test]
 fn test_first_some() {
     let slice = AnySlice::new(vec![1, 2, 3]);
-    assert_eq!(slice.first(), Some(&1));
+    assert_eq!(slice.first(), Some(1));
 }
 
 #[test]
@@ -208,7 +208,7 @@ fn test_first_none() {
 #[test]
 fn test_last_some() {
     let slice = AnySlice::new(vec![1, 2, 3]);
-    assert_eq!(slice.last(), Some(&3));
+    assert_eq!(slice.last(), Some(3));
 }
 
 #[test]
@@ -314,7 +314,7 @@ fn test_len_without_empty_all_non_default() {
 
 #[test]
 fn test_len_without_empty_string() {
-    let slice = AnySlice::new(vec!["".to_string(), "a".to_string(), "".to_string()]);
+    let slice = AnySlice::new(vec!["".to_string(), "attr".to_string(), "".to_string()]);
     assert_eq!(slice.len_without_empty(), 1);
 }
 
@@ -609,19 +609,19 @@ fn test_remove_by_index_last() {
 #[test]
 fn test_every_true() {
     let slice = AnySlice::new(vec![2, 4, 6]);
-    assert!(slice.every(|_,x| x % 2 == 0));
+    assert!(slice.every(|_, x| x % 2 == 0));
 }
 
 #[test]
 fn test_every_false() {
     let slice = AnySlice::new(vec![2, 3, 6]);
-    assert!(!slice.every(|_,x| x % 2 == 0));
+    assert!(!slice.every(|_, x| x % 2 == 0));
 }
 
 #[test]
 fn test_every_empty() {
     let slice: AnySlice<i32> = AnySlice::new(vec![]);
-    assert!(slice.every(|_,x| x % 2 == 0));
+    assert!(slice.every(|_, x| x % 2 == 0));
 }
 
 // ─────────────────────────────────────────────
@@ -631,7 +631,7 @@ fn test_every_empty() {
 #[test]
 fn test_each() {
     let mut slice = AnySlice::new(vec![1, 2, 3]);
-    slice.each(|_,x| x * 10);
+    slice.each(|_, x| x * 10);
     assert_eq!(slice.get_data(), vec![10, 20, 30]);
 }
 

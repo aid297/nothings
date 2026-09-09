@@ -6,7 +6,7 @@ use crate::compressions::zstd4::app::Zstd;
 
 #[test]
 fn test_compress_decompress() {
-    let data = b"hello world, this is a test for zstd compression";
+    let data = b"hello world, this is attr test for zstd compression";
     let compressed = Zstd::compress(data).unwrap();
     let decompressed = Zstd::decompress(&compressed).unwrap();
     assert_eq!(decompressed, data);

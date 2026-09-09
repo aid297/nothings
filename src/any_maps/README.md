@@ -117,13 +117,13 @@ println!("{}", scores.to_string(Some(" | ")));
 ### 查询与判断
 
 ```rust
-let map = AnyMap::from_iter(vec![("a", 1), ("b", 2), ("c", 3)]);
+let map = AnyMap::from_iter(vec![("attr", 1), ("b", 2), ("c", 3)]);
 
-assert!(map.in_key(&"a"));           // key "a" 存在
+assert!(map.in_key(&"attr"));           // key "attr" 存在
 assert!(map.in_values(&vec![1, 3])); // value 1 或 3 存在
 assert!(!map.not_in_key(&"b"));      // key "b" 存在
 
 // 遍历转换：每个 value 乘以 10
 map.each(|_k, v| v * 10);
-assert_eq!(*map.get_value_by_key(&"a").unwrap(), 10);
+assert_eq!(*map.get_value_by_key(&"attr").unwrap(), 10);
 ```

@@ -71,7 +71,7 @@ fn parse_validator_attrs(tokens: &proc_macro2::TokenStream) -> Vec<(String, Stri
 
 /// 解析新格式的规则字符串：`(rule1)(rule2)(rule3)`
 /// 每条规则包裹在 `(...)` 中，操作符直接跟在规则名后
-/// 例如：`(required)(min>10)(max<=100)(size==200)(size!=400)(in==a,b,c)(in!=e,c,d)`
+/// 例如：`(required)(min>10)(max<=100)(size==200)(size!=400)(in==attr,b,c)(in!=e,c,d)`
 fn parse_paren_rules(input: &str) -> Vec<String> {
     let mut rules = Vec::new();
     let chars: Vec<char> = input.chars().collect();
@@ -112,7 +112,7 @@ fn parse_paren_rules(input: &str) -> Vec<String> {
 /// ```ignore
 /// #[derive(Nothings)]
 /// struct MyStruct {
-///     #[validator[rule="(required)(min>10)(max<=100)(size==200)(in==a,b,c)" name="年龄" kind="usize"]]
+///     #[validator[rule="(required)(min>10)(max<=100)(size==200)(in==attr,b,c)" name="年龄" kind="usize"]]
 ///     age: usize,
 ///     
 ///     // 嵌套结构体，递归解析
@@ -123,11 +123,11 @@ fn parse_paren_rules(input: &str) -> Vec<String> {
 /// 
 /// 规则语法：
 /// - 每条规则用 `(...)` 包裹，操作符直接跟在规则名后
-/// - 格式：`(key op value)` 如 `(min>10)`、`(size==20)`、`(in==a,b,c)`
+/// - 格式：`(key op value)` 如 `(min>10)`、`(size==20)`、`(in==attr,b,c)`
 /// - 支持的操作符：`>`, `<`, `>=`, `<=`, `==`, `!=`
 /// - `required` 为无参数的独立规则
 /// - `ex` 规则使用冒号后跟函数列表：`(ex:fn1,fn2)`
-/// - `in` 规则支持 `==` (在列表中) 和 `!=` (不在列表中)：`(in==a,b,c)`、`(in!=x,y,z)`
+/// - `in` 规则支持 `==` (在列表中) 和 `!=` (不在列表中)：`(in==attr,b,c)`、`(in!=x,y,z)`
 /// 
 /// 嵌套语法：
 /// - 使用 `nested` 标记嵌套结构体字段

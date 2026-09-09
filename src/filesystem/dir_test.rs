@@ -407,11 +407,11 @@ fn test_zip_unzip_preserves_structure() {
     let restore = create_test_dir("zip_struct_restored");
 
     // 创建更深的目录结构
-    fs::create_dir_all(format!("{}/a/b/c", src)).unwrap();
+    fs::create_dir_all(format!("{}/attr/b/c", src)).unwrap();
     fs::write(format!("{}/root.txt", src), "root").unwrap();
-    fs::write(format!("{}/a/a.txt", src), "aaa").unwrap();
-    fs::write(format!("{}/a/b/b.txt", src), "bbb").unwrap();
-    fs::write(format!("{}/a/b/c/c.txt", src), "ccc").unwrap();
+    fs::write(format!("{}/attr/attr.txt", src), "aaa").unwrap();
+    fs::write(format!("{}/attr/b/b.txt", src), "bbb").unwrap();
+    fs::write(format!("{}/attr/b/c/c.txt", src), "ccc").unwrap();
 
     let dir = Dir::new(&src);
     let compressor = compressions::with_lz4();
@@ -421,9 +421,9 @@ fn test_zip_unzip_preserves_structure() {
     Dir::unzip(&zip_file, &restore, compressor.as_ref()).unwrap();
 
     assert_eq!(fs::read_to_string(format!("{}/root.txt", restore)).unwrap(), "root");
-    assert_eq!(fs::read_to_string(format!("{}/a/a.txt", restore)).unwrap(), "aaa");
-    assert_eq!(fs::read_to_string(format!("{}/a/b/b.txt", restore)).unwrap(), "bbb");
-    assert_eq!(fs::read_to_string(format!("{}/a/b/c/c.txt", restore)).unwrap(), "ccc");
+    assert_eq!(fs::read_to_string(format!("{}/attr/attr.txt", restore)).unwrap(), "aaa");
+    assert_eq!(fs::read_to_string(format!("{}/attr/b/b.txt", restore)).unwrap(), "bbb");
+    assert_eq!(fs::read_to_string(format!("{}/attr/b/c/c.txt", restore)).unwrap(), "ccc");
 
     cleanup(&src);
     let _ = fs::remove_file(&zip_file);

@@ -7,6 +7,47 @@ pub struct AnyMap<K, V> {
     values: AnySlice<V>,
 }
 
+pub trait AnyMapTrait<K, V> {
+    fn new() -> Self;
+    fn with_iter<I>(iter: I) -> Self;
+    fn with_hashmap(hash_map: HashMap<K, V>) -> Self;
+    fn set_data(&mut self, has_map: HashMap<K, V>) -> &mut Self;
+    fn push_datum(&mut self, key: K, value: V) -> &mut Self;
+    fn set_value_by_index(&mut self, index: usize, value: V) -> &mut Self;
+    fn set_value_by_key(&mut self, key: K, value: V) -> Result<&mut Self, Error>;
+    fn get_value_by_key(&self, key: &K) -> Result<&V, Error>;
+    fn to_hashmap(&self) -> HashMap<K, V>;
+    fn copy(&self) -> Self;
+    fn has(&self, key: &K) -> bool;
+    fn filter(&mut self, f: impl Fn(&K, &V) -> bool) -> &mut Self;
+    fn remove_empty(&mut self) -> &mut Self;
+    fn remove_by_key(&mut self, key: &K) -> &mut Self;
+    fn remove_by_index(&mut self, index: usize) -> &mut Self;
+    fn remove_by_keys(&mut self, keys: &Vec<K>) -> &mut Self;
+    fn remove_by_values(&mut self, values: &Vec<V>) -> &mut Self;
+    fn get_index_by_key(&self, key: &K) -> Option<usize>;
+    fn get_indexes_by_keys(&self, keys: &[K]) -> Vec<usize>;
+    fn get_indexes_by_values(&self, values: &[V]) -> Vec<usize>;
+    fn in_key(&self, key: &K) -> bool;
+    fn in_keys(&self, keys: &Vec<K>) -> bool;
+    fn not_in_key(&self, key: &K) -> bool;
+    fn not_in_keys(&self, keys: &Vec<K>) -> bool;
+    fn in_value(&self, value: &V) -> bool;
+    fn in_values(&self, values: &Vec<V>) -> bool;
+    fn not_in_value(&self, value: &V) -> bool;
+    fn not_in_values(&self, values: &Vec<V>) -> bool;
+    fn every(&self, func: impl Fn(&K, &V) -> bool) -> &mut Self;
+    fn each(&mut self, func: impl Fn(&K, &V) -> V) -> &mut Self;
+    fn clean(&self) -> &mut Self;
+    fn to_string(&self, sep: Option<&str>) -> String;
+}
+
+impl Default for AnyMap<(), ()> {
+    fn default() -> Self {
+        AnyMap::new()
+    }
+}
+
 impl<K, V> AnyMap<K, V> {
     pub fn new() -> Self {
         AnyMap {
@@ -14,64 +55,64 @@ impl<K, V> AnyMap<K, V> {
             values: AnySlice::new(vec![]),
         }
     }
-    
-    pub fn from_iter<I>(iter: I) -> Self
+
+    pub fn with_iter<I>(iter: I) -> Self
     where
-        I: IntoIterator<Item=(K, V)>,
+        I: IntoIterator<Item = (K, V)>,
     {
         let mut keys: AnySlice<K> = AnySlice::new(vec![]);
         let mut values: AnySlice<V> = AnySlice::new(vec![]);
-        
+
         for (k, v) in iter {
             keys.push(k);
             values.push(v);
         }
-        
+
         AnyMap { keys, values }
     }
-    
-    pub fn from_hashmap(hash_map: HashMap<K, V>) -> Self {
+
+    pub fn with_hashmap(hash_map: HashMap<K, V>) -> Self {
         let mut keys: AnySlice<K> = AnySlice::new(vec![]);
         let mut values: AnySlice<V> = AnySlice::new(vec![]);
-        
+
         for (k, v) in hash_map.into_iter() {
             keys.push(k);
             values.push(v);
         }
-        
+
         AnyMap { keys, values }
     }
-    
-    pub fn set_data(&mut self, has_map: HashMap<K, V>) -> &Self {
+
+    pub fn set_data(&mut self, has_map: HashMap<K, V>) -> &mut Self {
         let mut keys: AnySlice<K> = AnySlice::new(vec![]);
         let mut values: AnySlice<V> = AnySlice::new(vec![]);
-        
+
         for (k, v) in has_map.into_iter() {
             keys.push(k);
             values.push(v);
         }
-        
+
         self.keys = keys;
         self.values = values;
         self
     }
-    
-    pub fn push_datum(&mut self, key: K, value: V) -> &Self {
+
+    pub fn push_datum(&mut self, key: K, value: V) -> &mut Self {
         self.keys.push(key);
         self.values.push(value);
         self
     }
-    
-    pub fn set_value_by_index(&mut self, index: usize, value: V) -> &Self
+
+    pub fn set_value_by_index(&mut self, index: usize, value: V) -> &mut Self
     where
         V: Clone,
     {
         self.values.set_value(index, value);
-        
+
         self
     }
-    
-    pub fn set_value_by_key(&mut self, key: K, value: V) -> Result<&Self, Error>
+
+    pub fn set_value_by_key(&mut self, key: K, value: V) -> Result<&mut Self, Error>
     where
         K: PartialEq,
         V: Clone,
@@ -85,10 +126,11 @@ impl<K, V> AnyMap<K, V> {
             }
         }
     }
-    
-    pub fn get_value_by_key(&self, key: &K) -> Result<&V, Error>
+
+    pub fn get_value_by_key(&self, key: &K) -> Result<V, Error>
     where
         K: PartialEq,
+        V: Clone,
     {
         let idx = self.keys.get_index_by_value(key);
         match idx {
@@ -102,23 +144,26 @@ impl<K, V> AnyMap<K, V> {
             }
         }
     }
-    
+
     pub fn to_hashmap(&self) -> HashMap<K, V>
     where
         K: Clone + Eq + std::hash::Hash,
         V: Clone,
     {
         let mut hashmap = HashMap::new();
-        
+
         for idx in self.keys.get_indexes() {
-            if let (Some(k), Some(v)) = (self.keys.get_value_by_index(idx), self.values.get_value_by_index(idx)) {
+            if let (Some(k), Some(v)) = (
+                self.keys.get_value_by_index(idx),
+                self.values.get_value_by_index(idx),
+            ) {
                 hashmap.insert(k.clone(), v.clone());
             }
         }
-        
+
         hashmap
     }
-    
+
     pub fn copy(&self) -> Self
     where
         K: Clone,
@@ -129,38 +174,38 @@ impl<K, V> AnyMap<K, V> {
             values: self.values.copy(),
         }
     }
-    
+
     pub fn has(&self, key: &K) -> bool
     where
         K: PartialEq + Clone,
     {
         self.keys.has(&vec![key.clone()])
     }
-    
-    pub fn filter(&mut self, f: impl Fn(&K, &V) -> bool) -> &Self
+
+    pub fn filter(&mut self, f: impl Fn(&K, &V) -> bool) -> &mut Self
     where
         K: Clone,
         V: Clone,
     {
         let mut wait_to_remove_indexes: Vec<usize> = vec![];
-        
+
         for idx in self.keys.get_indexes() {
             let key = self.keys.get_value_by_index(idx).unwrap();
             let value = self.values.get_value_by_index(idx).unwrap();
-            
-            if !f(key, value) {
+
+            if !f(&key, &value) {
                 wait_to_remove_indexes.push(idx);
             }
         }
-        
+
         self.keys
             .remove_by_indexes(&wait_to_remove_indexes.to_vec());
         self.values
             .remove_by_indexes(&wait_to_remove_indexes.to_vec());
-        
+
         self
     }
-    
+
     pub fn remove_empty(&mut self) -> &Self
     where
         K: Clone,
@@ -170,18 +215,18 @@ impl<K, V> AnyMap<K, V> {
             .values
             .get_indexes()
             .into_iter()
-            .filter(|idx| self.values.get_value_by_index(*idx).unwrap() == &V::default())
+            .filter(|idx| self.values.get_value_by_index(*idx).unwrap() == V::default())
             .collect();
-        
+
         self.keys
             .remove_by_indexes(&wait_to_remove_indexes.to_vec());
         self.values
             .remove_by_indexes(&wait_to_remove_indexes.to_vec());
-        
+
         self
     }
-    
-    pub fn remove_by_key(&mut self, key: &K) -> &Self
+
+    pub fn remove_by_key(&mut self, key: &K) -> &mut Self
     where
         K: PartialEq,
     {
@@ -195,8 +240,8 @@ impl<K, V> AnyMap<K, V> {
             }
         }
     }
-    
-    pub fn remove_by_index(&mut self, index: usize) -> &Self {
+
+    pub fn remove_by_index(&mut self, index: usize) -> &mut Self {
         if index >= self.keys.len() || index >= self.values.len() {
             return self;
         }
@@ -204,36 +249,36 @@ impl<K, V> AnyMap<K, V> {
         self.values.remove_by_index(&index);
         self
     }
-    
-    pub fn remove_by_keys(&mut self, keys: &Vec<K>) -> &Self
+
+    pub fn remove_by_keys(&mut self, keys: &Vec<K>) -> &mut Self
     where
         K: PartialEq,
     {
         let indexes = self.get_indexes_by_keys(keys);
         self.keys.remove_by_indexes(&indexes);
         self.values.remove_by_indexes(&indexes);
-        
+
         self
     }
-    
-    pub fn remove_by_values(&mut self, values: &Vec<V>) -> &Self
+
+    pub fn remove_by_values(&mut self, values: &Vec<V>) -> &mut Self
     where
         V: PartialEq,
     {
         let indexes = self.get_indexes_by_values(values);
         self.keys.remove_by_indexes(&indexes);
         self.values.remove_by_indexes(&indexes);
-        
+
         self
     }
-    
+
     pub fn get_index_by_key(&self, key: &K) -> Option<usize>
     where
         K: PartialEq,
     {
         self.keys.get_index_by_value(key)
     }
-    
+
     pub fn get_indexes_by_keys(&self, keys: &[K]) -> Vec<usize>
     where
         K: PartialEq,
@@ -246,7 +291,7 @@ impl<K, V> AnyMap<K, V> {
         indexes.dedup();
         indexes
     }
-    
+
     pub fn get_indexes_by_values(&self, values: &[V]) -> Vec<usize>
     where
         V: PartialEq,
@@ -259,77 +304,66 @@ impl<K, V> AnyMap<K, V> {
         indexes.dedup();
         indexes
     }
-    
+
     pub fn in_key(&self, key: &K) -> bool
     where
         K: PartialEq + Clone,
     {
         self.keys.has(&vec![key.clone()])
     }
-    
+
     pub fn in_keys(&self, keys: &Vec<K>) -> bool
     where
         K: PartialEq,
     {
         keys.iter().all(|key| self.keys.to_vec().contains(key))
     }
-    
+
     pub fn not_in_key(&self, key: &K) -> bool
     where
         K: PartialEq + Clone,
     {
         self.keys.not_has(&vec![key.clone()])
     }
-    
+
     pub fn not_in_keys(&self, keys: &Vec<K>) -> bool
     where
         K: PartialEq,
     {
         self.keys.not_has(keys)
     }
-    
+
     pub fn in_value(&self, value: &V) -> bool
     where
         V: PartialEq + Clone,
     {
         self.values.has(&vec![value.clone()])
     }
-    
+
     pub fn in_values(&self, values: &Vec<V>) -> bool
     where
         V: PartialEq,
     {
-        values.iter().all(|value| self.values.to_vec().contains(value))
+        values
+            .iter()
+            .all(|value| self.values.to_vec().contains(value))
     }
-    
+
     pub fn not_in_value(&self, value: &V) -> bool
     where
         V: PartialEq + Clone,
     {
         self.values.not_has(&vec![value.clone()])
     }
-    
+
     pub fn not_in_values(&self, values: &Vec<V>) -> bool
     where
         V: PartialEq,
     {
         self.values.not_has(values)
     }
-    
-    pub fn every(&self, func: impl Fn(&K, &V) -> bool) -> &Self {
-        for idx in self.keys.get_indexes() {
-            let key = self.keys.get_value_by_index(idx).unwrap();
-            let value = self.values.get_value_by_index(idx).unwrap();
-            
-            if !func(key, value) {
-                return self;
-            }
-        }
-        
-        self
-    }
-    
-    pub fn each(&mut self, func: impl Fn(&K, &V) -> V) -> &Self
+
+    pub fn every(&self, func: impl Fn(&K, &V) -> bool) -> &Self
     where
         K: Clone,
         V: Clone,
@@ -337,24 +371,44 @@ impl<K, V> AnyMap<K, V> {
         for idx in self.keys.get_indexes() {
             let key = self.keys.get_value_by_index(idx).unwrap();
             let value = self.values.get_value_by_index(idx).unwrap();
-            
-            self.values.set_value(idx, func(key, value));
+
+            if !func(&key, &value) {
+                return self;
+            }
         }
-        
+
         self
     }
-    
-    pub fn clean(&self) -> AnyMap<K, V> {
-        AnyMap::new()
+
+    pub fn each(&mut self, func: impl Fn(&K, &V) -> V) -> &mut Self
+    where
+        K: Clone,
+        V: Clone,
+    {
+        for idx in self.keys.get_indexes() {
+            let key = self.keys.get_value_by_index(idx).unwrap();
+            let value = self.values.get_value_by_index(idx).unwrap();
+
+            self.values.set_value(idx, func(&key, &value));
+        }
+
+        self
     }
-    
+
+    pub fn clean(&mut self) -> &mut Self {
+        self.keys = AnySlice::new(vec![]);
+        self.values = AnySlice::new(vec![]);
+
+        self
+    }
+
     pub fn to_string(&self, sep: Option<&str>) -> String
     where
-        K: std::fmt::Display,
-        V: std::fmt::Display,
+        K: std::fmt::Display + Clone,
+        V: std::fmt::Display + Clone,
     {
-        let mut items:Vec<String> = vec![];
-        
+        let mut items: Vec<String> = vec![];
+
         for idx in self.keys.get_indexes() {
             if let Some(key) = self.keys.get_value_by_index(idx) {
                 if let Some(value) = self.values.get_value_by_index(idx) {
@@ -362,7 +416,7 @@ impl<K, V> AnyMap<K, V> {
                 }
             }
         }
-        
+
         items.join(sep.unwrap_or(","))
     }
 }

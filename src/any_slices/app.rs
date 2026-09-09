@@ -4,6 +4,60 @@ pub struct AnySlice<T> {
     data: Vec<T>,
 }
 
+pub trait AnySliceTrait<T> {
+    fn new(vec: Vec<T>) -> Self;
+    fn get_data(self) -> Vec<T>;
+    fn to_vec(&self) -> &Vec<T>;
+    fn set_data(&mut self, data: Vec<T>) -> &mut Self;
+    fn set_value(&mut self, index: usize, value: T) -> &mut Self;
+    fn empty(&self) -> bool;
+    fn not_empty(&self) -> bool;
+    fn has(&self, value: &Vec<T>) -> bool;
+    fn not_has(&self, value: &Vec<T>) -> bool;
+    fn get_value_by_index(&self, index: usize) -> Option<T>;
+    fn get_value_ptr(&self, index: usize) -> Option<*const T>;
+    fn get_value_default(&self, index: usize, default: T) -> T;
+    fn get_values(&self, indexes: &[usize]) -> Vec<T>;
+    fn get_values_by_slicer(&self, slicer: &AnySlice<usize>) -> Vec<T>;
+    fn first(&self) -> Option<T>;
+    fn last(&self) -> Option<T>;
+    fn get_indexes(&self) -> Vec<usize>;
+    fn get_index_by_value(&self, value: &T) -> Option<usize>;
+    fn get_indexes_by_values(&self, values: &Vec<T>) -> Vec<usize>;
+    fn shuffle(&self) -> AnySlice<T>;
+    fn shuffle_self(&mut self) -> &mut Self;
+    fn len(&self) -> usize;
+    fn len_without_empty(&self) -> usize;
+    fn remove_empty(&mut self) -> &mut Self;
+    fn append(&mut self, values: Vec<T>) -> &mut Self;
+    fn push(&mut self, value: T) -> &mut Self;
+    fn filter(&mut self, predicate: impl Fn(&T) -> bool) -> &mut Self;
+    fn all_empty(&self) -> bool;
+    fn any_empty(&self) -> bool;
+    fn copy(&self) -> Self;
+    fn chunk(&self, size: usize) -> Vec<Vec<T>>;
+    fn pluck<DST>(&self, func: impl Fn(&T) -> DST) -> Vec<DST>;
+    fn intersection(&self, other: &Vec<T>) -> AnySlice<T>;
+    fn intersection_slicer(&self, other: &AnySlice<T>) -> AnySlice<T>;
+    fn difference(&self, other: &Vec<T>) -> AnySlice<T>;
+    fn difference_slicer(&self, other: &AnySlice<T>) -> AnySlice<T>;
+    fn union(&self, other: &Vec<T>) -> AnySlice<T>;
+    fn union_slicer(&self, other: &AnySlice<T>) -> AnySlice<T>;
+    fn remove_by_index(&mut self, index: &usize) -> &mut Self;
+    fn remove_by_indexes(&mut self, indexes: &Vec<usize>) -> &mut Self;
+    fn every(&self, func: impl Fn(usize, &T) -> bool) -> bool;
+    fn each(&mut self, func: impl Fn(usize, &T) -> T) -> &mut Self;
+    fn sort(&mut self, func: impl Fn(&T, &T) -> std::cmp::Ordering) -> &mut Self;
+    fn clean(&mut self) -> &mut Self;
+    fn to_string(&self, sep: Option<&str>) -> String;
+}
+
+impl<T> Default for AnySlice<T> {
+    fn default() -> Self {
+        AnySlice { data: Vec::new() }
+    }
+}
+
 impl<T> AnySlice<T> {
     pub fn new(vec: Vec<T>) -> Self {
         AnySlice { data: vec }
@@ -17,15 +71,15 @@ impl<T> AnySlice<T> {
         &self.data
     }
 
-    pub fn set_data(&mut self, data: Vec<T>) {
+    pub fn set_data(&mut self, data: Vec<T>) -> &mut Self {
         self.data = data;
+
+        self
     }
 
-    pub fn set_value(&mut self, index: usize, value: T) -> &mut Self
-    where
-        T: Clone,
-    {
+    pub fn set_value(&mut self, index: usize, value: T) -> &mut Self {
         self.data[index] = value;
+
         self
     }
 
@@ -51,8 +105,13 @@ impl<T> AnySlice<T> {
         !self.has(value)
     }
 
-    pub fn get_value_by_index(&self, index: usize) -> Option<&T> {
-        self.to_vec().get(index)
+    pub fn get_value_by_index(&self, index: usize) -> Option<T>
+    where
+        T: Clone,
+    {
+        let value = self.to_vec().get(index);
+
+        value.cloned()
     }
 
     pub fn get_value_ptr(&self, index: usize) -> Option<*const T> {
@@ -66,27 +125,39 @@ impl<T> AnySlice<T> {
         self.to_vec().get(index).cloned().unwrap_or(default)
     }
 
-    pub fn get_values(&self, indexes: &[usize]) -> Vec<&T> {
+    pub fn get_values(&self, indexes: &[usize]) -> Vec<T>
+    where
+        T: Clone,
+    {
         indexes
             .iter()
-            .filter_map(|index| self.to_vec().get(*index))
+            .filter_map(|index| self.to_vec().get(*index).cloned())
             .collect()
     }
 
-    pub fn get_values_by_slicer(&self, slicer: &AnySlice<usize>) -> Vec<&T> {
+    pub fn get_values_by_slicer(&self, slicer: &AnySlice<usize>) -> Vec<T>
+    where
+        T: Clone,
+    {
         slicer
             .to_vec()
             .iter()
-            .filter_map(|index| self.to_vec().get(*index))
+            .filter_map(|index| self.to_vec().get(*index).cloned())
             .collect()
     }
 
-    pub fn first(&self) -> Option<&T> {
-        self.to_vec().first()
+    pub fn first(&self) -> Option<T>
+    where
+        T: Clone,
+    {
+        self.to_vec().first().cloned()
     }
 
-    pub fn last(&self) -> Option<&T> {
-        self.to_vec().last()
+    pub fn last(&self) -> Option<T>
+    where
+        T: Clone,
+    {
+        self.to_vec().last().cloned()
     }
 
     pub fn get_indexes(&self) -> Vec<usize> {
@@ -118,6 +189,11 @@ impl<T> AnySlice<T> {
         AnySlice {
             data: self.to_vec().clone(),
         }
+    }
+
+    pub fn shuffle_self(&mut self) -> &mut Self {
+        self.data.shuffle(&mut rand::rng());
+        self
     }
 
     pub fn len(&self) -> usize {
@@ -261,14 +337,14 @@ impl<T> AnySlice<T> {
         self.union(other.to_vec())
     }
 
-    pub fn remove_by_index(&mut self, index: &usize) -> &Self {
+    pub fn remove_by_index(&mut self, index: &usize) -> &mut Self {
         if *index < self.data.len() {
             self.data.remove(*index);
         }
         self
     }
 
-    pub fn remove_by_indexes(&mut self, indexes: &Vec<usize>) -> &Self {
+    pub fn remove_by_indexes(&mut self, indexes: &Vec<usize>) -> &mut Self {
         let _ = indexes.iter().map(|index| self.data.remove(*index));
         self
     }
@@ -282,7 +358,7 @@ impl<T> AnySlice<T> {
         true
     }
 
-    pub fn each(&mut self, func: impl Fn(usize, &T) -> T) -> &Self {
+    pub fn each(&mut self, func: impl Fn(usize, &T) -> T) -> &mut Self {
         let mut data = Vec::new();
 
         self.data.iter().enumerate().for_each(|(idx, item)| {

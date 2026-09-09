@@ -7,7 +7,7 @@ pub struct Check<T> {
 }
 
 /// 从规则字符串中提取规则名、操作符和值
-/// 新格式：`min>10`、`max<=100`、`size==200`、`in!=a,b,c`
+/// 新格式：`min>10`、`max<=100`、`size==200`、`in!=attr,b,c`
 /// 返回：(规则名, 操作符, 值) 如 (`min`, `>`, `10`)
 fn parse_rule_parts(rule: &str) -> Option<(&str, &str, &str)> {
     let bytes = rule.as_bytes();
@@ -193,7 +193,7 @@ where
                     continue;
                 }
 
-                // 通用规则新格式：`key op value`（如 `min>10`、`size==200`、`in==a[,、|、;]b[,、|、;]c`）
+                // 通用规则新格式：`key op value`（如 `min>10`、`size==200`、`in==attr[,、|、;]b[,、|、;]c`）
                 if let Some((key, op, value)) = parse_rule_parts(rule) {
                     match key {
                         "min" | "max" => {

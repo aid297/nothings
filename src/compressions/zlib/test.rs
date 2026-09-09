@@ -6,7 +6,7 @@ use crate::compressions::zlib::app::Zlib;
 
 #[test]
 fn test_compress_decompress() {
-    let data = b"hello world, this is a test for zlib compression";
+    let data = b"hello world, this is attr test for zlib compression";
     let compressed = Zlib::compress(data).unwrap();
     let decompressed = Zlib::decompress(&compressed).unwrap();
     assert_eq!(decompressed, data);
