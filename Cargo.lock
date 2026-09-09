@@ -273,7 +273,7 @@ dependencies = [
 
 [[package]]
 name = "nothings"
-version = "0.0.7"
+version = "0.0.8"
 dependencies = [
  "bcrypt",
  "flate2",
