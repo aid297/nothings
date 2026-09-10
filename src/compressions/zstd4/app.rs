@@ -24,7 +24,7 @@ impl Zstd {
     ///
     /// # 示例
     /// ```
-    /// use aid::compressions::zstd4::app::Zstd;
+    /// use nothings::compressions::zstd4::app::Zstd;
     ///
     /// let data = b"hello world";
     /// let compressed = Zstd::compress(data).unwrap();
@@ -46,7 +46,7 @@ impl Zstd {
     ///
     /// # 示例
     /// ```
-    /// use aid::compressions::zstd4::app::Zstd;
+    /// use nothings::compressions::zstd4::app::Zstd;
     ///
     /// let data = b"hello world";
     /// let compressed = Zstd::compress_with_level(data, 19).unwrap();
@@ -70,7 +70,7 @@ impl Zstd {
     ///
     /// # 示例
     /// ```
-    /// use aid::compressions::zstd4::app::Zstd;
+    /// use nothings::compressions::zstd4::app::Zstd;
     ///
     /// let data = b"hello world";
     /// let compressed = Zstd::compress(data).unwrap();

@@ -286,15 +286,15 @@ impl Dir {
     ///
     /// # 参数
     /// - `filename`: 压缩后的文件名
-    /// - `compressor`: 压缩算法实现，通过 `CompressorFactory` 创建
+    /// - `compressor`: 压缩算法实现，通过 `compressions::with_lz4()` 等工厂函数创建
     ///
     /// # 示例
-    /// ```
-    /// use aid::compressions::CompressorFactory;
-    /// use aid::filesystem::dir::Dir;
+    /// ```no_run
+    /// use nothings::compressions;
+    /// use nothings::filesystem::dir::Dir;
     ///
     /// let dir = Dir::new("/path/to/dir");
-    /// let compressor = CompressorFactory::with_lz4();
+    /// let compressor = compressions::with_lz4();
     /// dir.zip("output.lz4", compressor.as_ref()).unwrap();
     /// ```
     pub fn zip(&self, filename: &str, compressor: &dyn Compressor) -> Result<File, String> {
@@ -380,9 +380,9 @@ impl Dir {
     /// - `compressor`: 压缩算法实现，需与压缩时使用的算法一致
     ///
     /// # 示例
-    /// ```
-    /// use aid::compressions;
-    /// use aid::filesystem::dir::Dir;
+    /// ```no_run
+    /// use nothings::compressions;
+    /// use nothings::filesystem::dir::Dir;
     ///
     /// let compressor = compressions::with_lz4();
     /// let dir = Dir::unzip("output.lz4", "/path/to/restore", compressor.as_ref()).unwrap();

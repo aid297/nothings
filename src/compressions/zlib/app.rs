@@ -26,7 +26,7 @@ impl Zlib {
     ///
     /// # 示例
     /// ```
-    /// use aid::compressions::zlib::app::Zlib;
+    /// use nothings::compressions::zlib::app::Zlib;
     ///
     /// let data = b"hello world";
     /// let compressed = Zlib::compress(data).unwrap();
@@ -48,7 +48,7 @@ impl Zlib {
     ///
     /// # 示例
     /// ```
-    /// use aid::compressions::zlib::app::Zlib;
+    /// use nothings::compressions::zlib::app::Zlib;
     ///
     /// let data = b"hello world";
     /// let compressed = Zlib::compress_with_level(data, 9).unwrap();
@@ -69,7 +69,7 @@ impl Zlib {
     ///
     /// # 示例
     /// ```
-    /// use aid::compressions::zlib::app::Zlib;
+    /// use nothings::compressions::zlib::app::Zlib;
     ///
     /// let data = b"hello world";
     /// let compressed = Zlib::compress(data).unwrap();

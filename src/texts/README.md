@@ -20,10 +20,14 @@ let d = Duration::from_secs(3600);
 assert_eq!(d, HOUR);
 ```
 
-## Timer trait
+## TimeTrait
+
+`Time` 是结构体，`TimeTrait` 是其实现的 trait。调用 `Time::with_text` 等关联函数时必须把 `TimeTrait` 一起导入。
 
 ```rust
-pub trait Time {
+pub struct Time { /* duration, text */ }
+
+pub trait TimeTrait {
     fn new() -> Time;
     fn with_text(s: &str) -> Result<Time, String>;
     fn get_duration(&self) -> Duration;
@@ -51,7 +55,7 @@ pub trait Time {
 ### 基本用法
 
 ```rust
-use nothings::texts::prelude::Time;
+use nothings::texts::timer::{Time, TimeTrait};
 use std::time::Duration;
 
 let t = Time::with_text("10s").unwrap();
@@ -133,7 +137,7 @@ assert!(Time::with_text("s10").is_err());
 返回中文可读描述：
 
 ```rust
-use nothings::texts::prelude::Time;
+use nothings::texts::timer::{Time, TimeTrait};
 
 let t = Time::with_text("1h30m").unwrap();
 assert_eq!(t.to_chinese(), Ok("1小时30分钟".to_string()));
@@ -160,7 +164,7 @@ assert_eq!(t.to_chinese(), Ok("1周2天".to_string()));
 通过 `get_duration()` 获取标准库 `Duration`，可直接使用其所有方法：
 
 ```rust
-use nothings::texts::prelude::Time;
+use nothings::texts::timer::{Time, TimeTrait};
 
 let t = Time::with_text("1h30m").unwrap();
 let d = t.get_duration();
@@ -177,9 +181,11 @@ std::thread::sleep(d);
 
 ```
 texts/
-├── mod.rs        # 模块定义
-├── timer.rs      # Time trait、Time 结构体、时间常量
-├── volumer.rs    # Volume trait、Volume 结构体
-├── prelude.rs    # 统一导出 Time、Volumer
+├── mod.rs        # 模块定义（仅 timer 为 pub）
+├── timer.rs      # TimeTrait、Time 结构体、时间常量
+├── volumer.rs    # Volume trait、Volume 结构体（私有 mod，外部不可访问）
+├── prelude.rs    # 统一导出 Time、Volumer（私有 mod，外部不可访问）
 └── README.md     # 本文档
 ```
+
+> `volumer` 与 `prelude` 在 `mod.rs` 中声明为私有 `mod`，外部 crate 无法使用；公开可用的只有 `nothings::texts::timer`。
