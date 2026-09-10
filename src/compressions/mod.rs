@@ -1,5 +1,6 @@
 pub mod lz4;
 pub mod zlib;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod zstd4;
 
 use std::io::Error;
@@ -31,11 +32,17 @@ pub fn with_zlib_level(level: u32) -> Box<dyn Compressor> {
 }
 
 /// 创建 Zstd 压缩器（默认级别 3）
+///
+/// 仅在非 wasm 目标可用（zstd 为 C 绑定实现）
+#[cfg(not(target_arch = "wasm32"))]
 pub fn with_zstd() -> Box<dyn Compressor> {
     Box::new(zstd4::app::Zstd::new())
 }
 
 /// 创建 Zstd 压缩器（指定级别 1-21）
+///
+/// 仅在非 wasm 目标可用（zstd 为 C 绑定实现）
+#[cfg(not(target_arch = "wasm32"))]
 pub fn with_zstd_level(level: i32) -> Box<dyn Compressor> {
     Box::new(zstd4::app::Zstd::with_level(level))
 }

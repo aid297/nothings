@@ -402,6 +402,33 @@ impl<K, V> AnyMap<K, V> {
         self
     }
 
+    /// 获取键值对数量
+    pub fn len(&self) -> usize {
+        self.keys.len()
+    }
+
+    /// 按插入顺序导出全部键值对
+    ///
+    /// 与 `to_hashmap` 不同，返回的 `Vec` 严格保持插入顺序
+    pub fn to_entries(&self) -> Vec<(K, V)>
+    where
+        K: Clone,
+        V: Clone,
+    {
+        let mut entries: Vec<(K, V)> = vec![];
+
+        for idx in self.keys.get_indexes() {
+            if let (Some(k), Some(v)) = (
+                self.keys.get_value_by_index(idx),
+                self.values.get_value_by_index(idx),
+            ) {
+                entries.push((k, v));
+            }
+        }
+
+        entries
+    }
+
     pub fn to_string(&self, sep: Option<&str>) -> String
     where
         K: std::fmt::Display + Clone,

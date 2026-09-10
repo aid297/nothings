@@ -1,6 +1,14 @@
-use lz4::{Decoder, EncoderBuilder};
-use std::io::{Error, Read, Write};
+use lz4_flex::frame::{FrameDecoder, FrameEncoder};
+use std::io::{Error, ErrorKind, Read, Write};
 use crate::compressions::Compressor;
+
+/// 将 lz4_flex 错误转换为 `std::io::Error`
+fn to_io_error(err: lz4_flex::frame::Error) -> Error {
+    match err {
+        lz4_flex::frame::Error::IoError(e) => e,
+        err => Error::new(ErrorKind::InvalidData, err.to_string()),
+    }
+}
 
 /// LZ4 压缩工具
 pub struct Lz4 {
@@ -22,7 +30,7 @@ impl Lz4 {
     ///
     /// # 示例
     /// ```
-    /// use aid::compressions::lz4::app::Lz4;
+    /// use nothings::compressions::lz4::app::Lz4;
     ///
     /// let data = b"hello world";
     /// let compressed = Lz4::compress(data).unwrap();
@@ -39,12 +47,16 @@ impl Lz4 {
     /// - `data`: 待压缩数据
     /// - `level`: 压缩级别，范围 1-16（1 最快，16 最高压缩率）
     ///
+    /// # 说明
+    /// 当前基于 lz4_flex（纯 Rust 实现），仅支持快速压缩模式，
+    /// 级别参数不影响压缩结果，保留用于 API 兼容
+    ///
     /// # 错误
-    /// 如果压缩级别无效或压缩失败，返回 `std::io::Error`
+    /// 如果压缩失败，返回 `std::io::Error`
     ///
     /// # 示例
     /// ```
-    /// use aid::compressions::lz4::app::Lz4;
+    /// use nothings::compressions::lz4::app::Lz4;
     ///
     /// let data = b"hello world";
     /// let compressed = Lz4::compress_with_level(data, 9).unwrap();
@@ -52,12 +64,10 @@ impl Lz4 {
     /// assert_eq!(decompressed, data);
     /// ```
     pub fn compress_with_level(data: &[u8], level: u32) -> Result<Vec<u8>, Error> {
-        let mut encoder = EncoderBuilder::new()
-            .level(level)
-            .build(Vec::new())?;
+        let _ = level;
+        let mut encoder = FrameEncoder::new(Vec::new());
         encoder.write_all(data)?;
-        let (output, result) = encoder.finish();
-        result.map(|_| output)
+        encoder.finish().map_err(to_io_error)
     }
 
     /// 解压数据
@@ -67,7 +77,7 @@ impl Lz4 {
     ///
     /// # 示例
     /// ```
-    /// use aid::compressions::lz4::app::Lz4;
+    /// use nothings::compressions::lz4::app::Lz4;
     ///
     /// let data = b"hello world";
     /// let compressed = Lz4::compress(data).unwrap();
@@ -75,7 +85,7 @@ impl Lz4 {
     /// assert_eq!(decompressed, data);
     /// ```
     pub fn decompress(data: &[u8]) -> Result<Vec<u8>, Error> {
-        let mut decoder = Decoder::new(data)?;
+        let mut decoder = FrameDecoder::new(data);
         let mut output = Vec::new();
         decoder.read_to_end(&mut output)?;
         Ok(output)

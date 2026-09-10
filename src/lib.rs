@@ -5,8 +5,10 @@ pub mod any_slices;
 pub mod compressions;
 pub mod coroutines;
 pub mod digests;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod filesystem;
 pub mod http_responses;
 pub mod singletons;
 pub mod texts;
 pub mod validations;
+pub mod wasm_exports;

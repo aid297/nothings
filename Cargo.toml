@@ -1,6 +1,6 @@
 [package]
 name = "nothings"
-version = "0.0.8"
+version = "0.0.9"
 edition = "2024"
 description = "一个实用的工具库"
 license = "MIT"
@@ -10,15 +10,25 @@ keywords = ["slice", "collection", "utility"]   # 可选，最多5个，方便�
 categories = ["data-structures"]
 readme = "README.md"
 
+[lib]
+crate-type = ["lib", "cdylib"]
+
 [dependencies]
 rand = "0.10.2"
-lz4 = "1.28"
-minilzo = "0.2"
 flate2 = "1"
-zstd = "0.13"
-tokio = { version = "1", features = ["rt-multi-thread", "time", "sync", "macros"] }
 bcrypt = "0.17"
 md-5 = "0.10"
 sha2 = "0.10"
 nothings-macros = { version = "0.0.2", path = "nothings-macros" }
 serde = { version = "1.0.229", features = ["derive"] }
+lz4_flex = { version = "0.14", features = ["frame"] }
+serde_json = "1"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+zstd = "0.13"
+
+# 浏览器（wasm32-unknown-unknown）场景：随机数走 JS 宿主
+# wasip1 场景（如 wazero）：getrandom 自动走 WASI random_get，无需此依赖
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+getrandom = { version = "0.3", features = ["wasm_js"] }
+getrandom_04 = { package = "getrandom", version = "0.4", features = ["wasm_js"] }
